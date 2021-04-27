@@ -78,7 +78,7 @@ namespace MyHealth.API.Activity.UnitTests.ServiceTests
         }
 
         [Fact]
-        public async Task CatchExceptionWhenCosmosThrowsException()
+        public async Task CatchExceptionWhenCosmosThrowsExceptionWhenGetActivitiesIsCalled()
         {
             // Arrange
             _mockContainer.Setup(x => x.GetItemQueryIterator<mdl.ActivityEnvelope>(
@@ -89,6 +89,69 @@ namespace MyHealth.API.Activity.UnitTests.ServiceTests
 
             // Act
             Func<Task> responseAction = async () => await _sut.GetActivities();
+
+            // Act
+            await responseAction.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task GetActivityByDate()
+        {
+            // Arrange
+            List<mdl.ActivityEnvelope> activityEnvelopes = new List<mdl.ActivityEnvelope>();
+            mdl.ActivityEnvelope activityEnvelope = new mdl.ActivityEnvelope
+            {
+                Id = Guid.NewGuid().ToString(),
+                DocumentType = "Test",
+                Activity = new mdl.Activity
+                {
+                    CaloriesBurned = 4500,
+                    ActivityDate = "31/12/2019"
+                }
+            };
+            activityEnvelopes.Add(activityEnvelope);
+
+            _mockContainer.SetupItemQueryIteratorMock(activityEnvelopes);
+            _mockContainer.SetupItemQueryIteratorMock(new List<int> { activityEnvelopes.Count });
+
+            var activityDate = activityEnvelope.Activity.ActivityDate;
+
+            // Act
+            var response = await _sut.GetActivityByDate(activityDate);
+
+            // Assert
+            Assert.Equal(activityDate, response.Activity.ActivityDate);
+        }
+
+        [Fact]
+        public async Task GetActivityByDate_NoResultsReturned()
+        {
+            // Arrange
+            var emptyActivitiesList = new List<mdl.ActivityEnvelope>();
+
+            var getActivities = _mockContainer.SetupItemQueryIteratorMock(emptyActivitiesList);
+            getActivities.feedIterator.Setup(x => x.HasMoreResults).Returns(false);
+            _mockContainer.SetupItemQueryIteratorMock(new List<int>() { 0 });
+
+            // Act
+            var response = await _sut.GetActivityByDate("31/12/2019");
+
+            // Act
+            Assert.Null(response);
+        }
+
+        [Fact]
+        public async Task CatchExceptionWhenCosmosThrowsExceptionWhenGetActivityByDateIsCalled()
+        {
+            // Arrange
+            _mockContainer.Setup(x => x.GetItemQueryIterator<mdl.ActivityEnvelope>(
+                It.IsAny<QueryDefinition>(),
+                It.IsAny<string>(),
+                It.IsAny<QueryRequestOptions>()))
+                .Throws(new Exception());
+
+            // Act
+            Func<Task> responseAction = async () => await _sut.GetActivityByDate("31/12/2019");
 
             // Act
             await responseAction.Should().ThrowAsync<Exception>();
