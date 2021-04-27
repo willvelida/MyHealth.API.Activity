@@ -44,7 +44,6 @@ namespace MyHealth.API.Activity.Functions
             {
                 log.LogError($"Internal Server Error. Exception thrown: {ex.Message}");
                 result = new StatusCodeResult(StatusCodes.Status500InternalServerError);
-                throw;
             }
 
             return result;

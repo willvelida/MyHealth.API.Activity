@@ -1,6 +1,101 @@
-﻿namespace MyHealth.API.Activity.UnitTests.FunctionTests
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
+using MyHealth.API.Activity.Functions;
+using MyHealth.API.Activity.Services;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using Xunit;
+using mdl = MyHealth.Common.Models;
+
+namespace MyHealth.API.Activity.UnitTests.FunctionTests
 {
-    class GetAllActivitiesShould
+    public class GetAllActivitiesShould
     {
+        private Mock<IActivityDbService> _mockActivityDbService;
+        private Mock<HttpRequest> _mockHttpRequest;
+        private Mock<ILogger> _mockLogger;
+
+        private GetAllActivities _func;
+
+        public GetAllActivitiesShould()
+        {
+            _mockActivityDbService = new Mock<IActivityDbService>();
+            _mockHttpRequest = new Mock<HttpRequest>();
+            _mockLogger = new Mock<ILogger>();
+
+            _func = new GetAllActivities(_mockActivityDbService.Object);
+        }
+
+        [Fact]
+        public async Task ReturnOkObjectResultWhenActivitiesAreFound()
+        {
+            // Arrange
+            var activities = new List<mdl.ActivityEnvelope>();
+            var testActivityEnvelope = new mdl.ActivityEnvelope
+            {
+                Id = Guid.NewGuid().ToString(),
+                Activity = new mdl.Activity
+                {
+                    CaloriesBurned = 2000
+                },
+                DocumentType = "Test"
+            };
+            activities.Add(testActivityEnvelope);
+            byte[] byteArray = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(activities));
+            MemoryStream memoryStream = new MemoryStream(byteArray);
+            _mockHttpRequest.Setup(r => r.Body).Returns(memoryStream);
+
+            _mockActivityDbService.Setup(x => x.GetActivities()).ReturnsAsync(activities);
+
+            // Act
+            var response = await _func.Run(_mockHttpRequest.Object, _mockLogger.Object);
+
+            // Assert
+            Assert.Equal(typeof(OkObjectResult), response.GetType());
+        }
+
+        [Fact]
+        public async Task ReturnOkObjectResultWhenNoActivitiesFound()
+        {
+            // Arrange
+            var activities = new List<mdl.ActivityEnvelope>();
+            byte[] byteArray = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(activities));
+            MemoryStream memoryStream = new MemoryStream(byteArray);
+            _mockHttpRequest.Setup(r => r.Body).Returns(memoryStream);
+
+            _mockActivityDbService.Setup(x => x.GetActivities()).ReturnsAsync(activities);
+
+            // Act
+            var response = await _func.Run(_mockHttpRequest.Object, _mockLogger.Object);
+
+            // Assert
+            Assert.Equal(typeof(OkObjectResult), response.GetType());
+        }
+
+        [Fact]
+        public async Task Throw500InternalServerErrorStatusCodeWhenActivityDbServiceThrowsException()
+        {
+            // Arrange
+            var activities = new List<mdl.ActivityEnvelope>();
+            byte[] byteArray = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(activities));
+            MemoryStream memoryStream = new MemoryStream(byteArray);
+            _mockHttpRequest.Setup(r => r.Body).Returns(memoryStream);
+
+            _mockActivityDbService.Setup(x => x.GetActivities()).ThrowsAsync(new Exception());
+
+            // Act
+            var response = await _func.Run(_mockHttpRequest.Object, _mockLogger.Object);
+
+            // Assert
+            Assert.Equal(typeof(StatusCodeResult), response.GetType());
+            var responseAsStatusCodeResult = (StatusCodeResult)response;
+            Assert.Equal(500, responseAsStatusCodeResult.StatusCode);
+        }
     }
 }
