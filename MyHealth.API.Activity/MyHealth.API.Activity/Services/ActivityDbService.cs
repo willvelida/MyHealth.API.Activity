@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MyHealth.Common.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MyHealth.API.Activity.Services
@@ -38,6 +39,31 @@ namespace MyHealth.API.Activity.Services
                 }
 
                 return activityEnvelopes;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<ActivityEnvelope> GetActivityByDate(string activityDate)
+        {
+            try
+            {
+                QueryDefinition query = new QueryDefinition("SELECT * FROM Records c WHERE c.DocumentType = 'Activity' AND c.Activity.ActivityDate = @activityDate")
+                    .WithParameter("@activityDate", activityDate);
+
+                List<ActivityEnvelope> activityEnvelopes = new List<ActivityEnvelope>();
+
+                FeedIterator<ActivityEnvelope> feedIterator = _container.GetItemQueryIterator<ActivityEnvelope>(query);
+
+                while (feedIterator.HasMoreResults)
+                {
+                    FeedResponse<ActivityEnvelope> queryResponse = await feedIterator.ReadNextAsync();
+                    activityEnvelopes.AddRange(queryResponse.Resource);
+                }
+
+                return activityEnvelopes.FirstOrDefault();
             }
             catch (Exception ex)
             {

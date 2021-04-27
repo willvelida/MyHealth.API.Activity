@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyHealth.API.Activity;
 using MyHealth.API.Activity.Services;
+using MyHealth.API.Activity.Validators;
 using System.IO;
 
 [assembly: FunctionsStartup(typeof(Startup))]
@@ -29,6 +30,7 @@ namespace MyHealth.API.Activity
             });
 
             builder.Services.AddScoped<IActivityDbService, ActivityDbService>();
+            builder.Services.AddScoped<IDateValidator, DateValidator>();
         }
     }
 }
