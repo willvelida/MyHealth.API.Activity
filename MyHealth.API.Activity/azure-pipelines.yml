@@ -40,6 +40,20 @@ stages:
             inputs:
               command: 'test'
               projects: '**/*UnitTests/*.csproj'
+              arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/'
+              publishTestResults: true
+  
+          - script: |
+              dotnet tool install -g dotnet-reportgenerator-globaltool
+              reportgenerator -reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:HtmlInline_AzurePipelines;Cobertura
+            displayName: Create Code coverage report
+  
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish Code Coverage'
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'
+              reportDirectory: '$(Build.SourcesDirectory)/TestResults/Coverage/'
     
           - task: DotNetCoreCLI@2
             displayName: Publish
