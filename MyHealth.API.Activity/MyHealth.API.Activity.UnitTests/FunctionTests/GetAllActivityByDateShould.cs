@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using MyHealth.API.Activity.Functions;
 using MyHealth.API.Activity.Services;
 using MyHealth.API.Activity.Validators;
+using MyHealth.Common;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,8 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
     {
         private Mock<IActivityDbService> _mockActivityDbService;
         private Mock<IDateValidator> _mockDateValidator;
+        private Mock<IServiceBusHelpers> _mockServiceBusHelpers;
+        private Mock<IConfiguration> _mockConfiguration;
         private Mock<HttpRequest> _mockHttpRequest;
         private Mock<ILogger> _mockLogger;
 
@@ -29,12 +32,16 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
         {
             _mockActivityDbService = new Mock<IActivityDbService>();
             _mockDateValidator = new Mock<IDateValidator>();
+            _mockServiceBusHelpers = new Mock<IServiceBusHelpers>();
+            _mockConfiguration = new Mock<IConfiguration>();
             _mockHttpRequest = new Mock<HttpRequest>();
             _mockLogger = new Mock<ILogger>();
 
             _func = new GetActivityByDate(
                 _mockActivityDbService.Object,
-                _mockDateValidator.Object);
+                _mockDateValidator.Object,
+                _mockServiceBusHelpers.Object,
+                _mockConfiguration.Object);
         }
 
         [Theory]
@@ -59,6 +66,7 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
             Assert.Equal(typeof(BadRequestResult), response.GetType());
             var responseAsStatusCodeResult = (StatusCodeResult)response;
             Assert.Equal(400, responseAsStatusCodeResult.StatusCode);
+            _mockServiceBusHelpers.Verify(x => x.SendMessageToQueue(It.IsAny<string>(), It.IsAny<Exception>()), Times.Never);
         }
 
         [Fact]
@@ -81,6 +89,7 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
             Assert.Equal(typeof(NotFoundResult), response.GetType());
             var responseAsStatusCodeResult = (StatusCodeResult)response;
             Assert.Equal(404, responseAsStatusCodeResult.StatusCode);
+            _mockServiceBusHelpers.Verify(x => x.SendMessageToQueue(It.IsAny<string>(), It.IsAny<Exception>()), Times.Never);
         }
 
         [Fact]
@@ -110,6 +119,7 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
 
             // Assert
             Assert.Equal(typeof(OkObjectResult), response.GetType());
+            _mockServiceBusHelpers.Verify(x => x.SendMessageToQueue(It.IsAny<string>(), It.IsAny<Exception>()), Times.Never);
         }
 
         [Fact]
@@ -132,6 +142,7 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
             Assert.Equal(typeof(StatusCodeResult), response.GetType());
             var responseAsStatusCodeResult = (StatusCodeResult)response;
             Assert.Equal(500, responseAsStatusCodeResult.StatusCode);
+            _mockServiceBusHelpers.Verify(x => x.SendMessageToQueue(It.IsAny<string>(), It.IsAny<Exception>()), Times.Once);
         }
     }
 }

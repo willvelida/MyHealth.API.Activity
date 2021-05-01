@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MyHealth.API.Activity;
 using MyHealth.API.Activity.Services;
 using MyHealth.API.Activity.Validators;
+using MyHealth.Common;
 using System.IO;
 
 [assembly: FunctionsStartup(typeof(Startup))]
@@ -25,8 +26,14 @@ namespace MyHealth.API.Activity
 
             builder.Services.AddSingleton(sp =>
             {
-                IConfiguration config = sp.GetService<IConfiguration>();
-                return new CosmosClient(config["CosmosDBConnectionString"]);
+                IConfiguration configuration = sp.GetService<IConfiguration>();
+                return new CosmosClient(configuration["CosmosDBConnectionString"]);
+            });
+
+            builder.Services.AddSingleton<IServiceBusHelpers>(sp =>
+            {
+                IConfiguration configuration = sp.GetService<IConfiguration>();
+                return new ServiceBusHelpers(configuration["ServiceBusConnectionString"]);
             });
 
             builder.Services.AddScoped<IActivityDbService, ActivityDbService>();
