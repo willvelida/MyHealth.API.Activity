@@ -45,9 +45,9 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
         }
 
         [Theory]
-        [InlineData("100/12/2020")]
-        [InlineData("12/111/2020")]
-        [InlineData("12/11/20201")]
+        [InlineData("2020-12-100")]
+        [InlineData("2020-111-12")]
+        [InlineData("20201-12-11")]
         public async Task ThrowBadRequestResultWhenActivityDateRequestIsInvalid(string invalidDateInput)
         {
             // Arrange
@@ -76,7 +76,7 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
             var activityEnvelope = new mdl.ActivityEnvelope();
             byte[] byteArray = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(activityEnvelope));
             MemoryStream memoryStream = new MemoryStream(byteArray);
-            _mockHttpRequest.Setup(r => r.Query["date"]).Returns("31/12/2019");
+            _mockHttpRequest.Setup(r => r.Query["date"]).Returns("2019-12-31");
             _mockHttpRequest.Setup(r => r.Body).Returns(memoryStream);
 
             _mockDateValidator.Setup(x => x.IsActivityDateValid(It.IsAny<string>())).Returns(true);
@@ -101,7 +101,7 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
                 Id = Guid.NewGuid().ToString(),
                 Activity = new mdl.Activity
                 {
-                    ActivityDate = "31/12/2019"
+                    ActivityDate = "2019-12-31"
                 },
                 DocumentType = "Test"
             };
@@ -129,7 +129,7 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
             var activityEnvelope = new mdl.ActivityEnvelope();
             byte[] byteArray = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(activityEnvelope));
             MemoryStream memoryStream = new MemoryStream(byteArray);
-            _mockHttpRequest.Setup(r => r.Query["date"]).Returns("31/12/2019");
+            _mockHttpRequest.Setup(r => r.Query["date"]).Returns("2019-12-31");
             _mockHttpRequest.Setup(r => r.Body).Returns(memoryStream);
 
             _mockDateValidator.Setup(x => x.IsActivityDateValid(It.IsAny<string>())).Returns(true);

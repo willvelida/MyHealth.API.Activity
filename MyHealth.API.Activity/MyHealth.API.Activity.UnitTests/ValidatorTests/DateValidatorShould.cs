@@ -29,7 +29,7 @@ namespace MyHealth.API.Activity.UnitTests.ValidatorTests
         public void ReturnTrueIfActivityDateIsInValidFormat()
         {
             // Arrange
-            string testActivityDate = "31/12/2020";
+            string testActivityDate = "2020-12-31";
 
             // Act
             var response = _sut.IsActivityDateValid(testActivityDate);
