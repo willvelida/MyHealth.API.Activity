@@ -34,14 +34,13 @@ namespace MyHealth.API.Activity.Functions
         [FunctionName(nameof(GetActivityByDate))]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Activity")] HttpRequest req,
-            ILogger log)
+            ILogger log,
+            string activityDate)
         {
             IActionResult result = null;
 
             try
             {
-                string activityDate = req.Query["date"];
-
                 bool isDateValid = _dateValidator.IsActivityDateValid(activityDate);
                 if (isDateValid == false)
                 {

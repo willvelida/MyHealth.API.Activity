@@ -31,7 +31,7 @@ namespace MyHealth.API.Activity.Functions
 
         [FunctionName(nameof(GetAllActivities))]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Activities")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Activity")] HttpRequest req,
             ILogger log)
         {
             IActionResult result;
