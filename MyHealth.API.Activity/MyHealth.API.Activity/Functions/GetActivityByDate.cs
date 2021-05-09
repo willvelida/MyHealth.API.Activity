@@ -33,7 +33,7 @@ namespace MyHealth.API.Activity.Functions
 
         [FunctionName(nameof(GetActivityByDate))]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Activity")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Activity/{activityDate}")] HttpRequest req,
             ILogger log,
             string activityDate)
         {
