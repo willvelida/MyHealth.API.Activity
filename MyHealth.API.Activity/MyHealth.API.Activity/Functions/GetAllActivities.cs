@@ -41,6 +41,12 @@ namespace MyHealth.API.Activity.Functions
             {
                 var activityEnvelopes = await _activityDbService.GetActivities();
 
+                if (activityEnvelopes == null)
+                {
+                    result = new NotFoundResult();
+                    return result;
+                }
+
                 foreach (var item in activityEnvelopes)
                 {
                     activities.Add(item.Activity);
