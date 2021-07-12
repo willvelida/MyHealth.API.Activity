@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -39,15 +40,8 @@ namespace MyHealth.API.Activity.UnitTests.ServiceTests
         {
             // Arrange
             List<mdl.ActivityEnvelope> activityEnvelopes = new List<mdl.ActivityEnvelope>();
-            mdl.ActivityEnvelope activityEnvelope = new mdl.ActivityEnvelope
-            {
-                Id = Guid.NewGuid().ToString(),
-                DocumentType = "Test",
-                Activity = new mdl.Activity
-                {
-                    CaloriesBurned = 4500
-                }
-            };
+            var fixture = new Fixture();
+            mdl.ActivityEnvelope activityEnvelope = fixture.Create<mdl.ActivityEnvelope>(); ;
             activityEnvelopes.Add(activityEnvelope);
 
             _mockContainer.SetupItemQueryIteratorMock(activityEnvelopes);

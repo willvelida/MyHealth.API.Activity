@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoFixture;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -45,16 +46,9 @@ namespace MyHealth.API.Activity.UnitTests.FunctionTests
         public async Task ReturnOkObjectResultWhenActivitiesAreFound()
         {
             // Arrange
+            var fixture = new Fixture();
             var activities = new List<mdl.ActivityEnvelope>();
-            var testActivityEnvelope = new mdl.ActivityEnvelope
-            {
-                Id = Guid.NewGuid().ToString(),
-                Activity = new mdl.Activity
-                {
-                    CaloriesBurned = 2000
-                },
-                DocumentType = "Test"
-            };
+            var testActivityEnvelope = fixture.Create<mdl.ActivityEnvelope>();
             activities.Add(testActivityEnvelope);
             byte[] byteArray = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(activities));
             MemoryStream memoryStream = new MemoryStream(byteArray);
