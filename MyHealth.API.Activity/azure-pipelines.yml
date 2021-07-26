@@ -104,7 +104,7 @@ stages:
                     enableCustomDeployment: true
                     RemoveAdditionalFilesFlag: true
 
-  - stage: Approve Post-Prod deployment
+  - stage: Approve PostProd deployment
     displayName: 'Approve Post-Prod deployment'
     dependsOn: Deploy
     condition: succeeded()
