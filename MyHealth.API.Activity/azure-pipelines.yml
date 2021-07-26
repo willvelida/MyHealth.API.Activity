@@ -103,3 +103,21 @@ stages:
                     appSettings: '-FUNCTIONS_WORKER_RUNTIME "dotnet" -FUNCTIONS_EXTENSION_VERSION "~3" -CosmosDBConnectionString "$(cosmosdbconnectionstring)" -DatabaseName "MyHealthDB" -ContainerName "Records"  -APPINSIGHTS_INSTRUMENTATIONKEY "2fc597df-fc6b-4b20-ac9c-ee7240b70704" -ServiceBusConnectionString "$(servicebusstorageconnectionstring)" -ExceptionQueue "myhealthexceptionqueue"'
                     enableCustomDeployment: true
                     RemoveAdditionalFilesFlag: true
+
+  - stage: Approve Post-Prod deployment
+    displayName: 'Approve Post-Prod deployment'
+    dependsOn: Deploy
+    condition: succeeded()
+
+    jobs:
+      - job: waitForValidation
+        displayName: Wait for validation
+        pool: server 
+        timeoutInMinutes: 4320
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 1440
+            inputs:
+              notifyUsers: willvelida@hotmail.co.uk
+              instructions: 'Post Prod Deployment ready for approval'
+              onTimeout: 'fail'
