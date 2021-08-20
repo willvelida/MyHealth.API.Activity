@@ -1,12 +1,10 @@
 trigger:
   - main
-  - feature/*
 
 variables:
   buildConfiguration: 'Release'
   vmImageName: 'vs2017-win2016'
   functionAppName: 'famyhealthapiactivity'
-  postProdFunctionAppName: 'famyhealthapiactivitypostprod'
   azureSubscription: 'e86d34ea-25ef-4288-8ffb-5baaea87a61b'
   workingDirectory: '$(System.DefaultWorkingDirectory)/MyHealth.API.Activity'
   projectName: 'MyHealth.API.Activity'
@@ -105,56 +103,3 @@ stages:
                     appSettings: '-FUNCTIONS_WORKER_RUNTIME "dotnet" -FUNCTIONS_EXTENSION_VERSION "~3" -CosmosDBConnectionString "$(cosmosdbconnectionstring)" -DatabaseName "MyHealthDB" -ContainerName "Records"  -APPINSIGHTS_INSTRUMENTATIONKEY "2fc597df-fc6b-4b20-ac9c-ee7240b70704" -ServiceBusConnectionString "$(servicebusstorageconnectionstring)" -ExceptionQueue "myhealthexceptionqueue"'
                     enableCustomDeployment: true
                     RemoveAdditionalFilesFlag: true
-
-  - stage: Approve_PostProd_deployment
-    displayName: 'Approve Post-Prod deployment'
-    dependsOn: Deploy
-    condition: succeeded()
-
-    jobs:
-      - job: waitForValidation
-        displayName: Wait for validation
-        pool: server 
-        timeoutInMinutes: 4320
-        steps:
-          - task: ManualValidation@0
-            timeoutInMinutes: 1440
-            inputs:
-              notifyUsers: willvelida@hotmail.co.uk
-              instructions: 'Post Prod Deployment ready for approval'
-              onTimeout: 'fail'
-
-  - stage: Deploy_To_Post_Prod
-    displayName: 'Deploy MyHealth.API.Activity to Post Prod'
-    dependsOn: Approve_PostProd_deployment
-    condition: succeeded()
-          
-    jobs:
-      - deployment: Deploy
-        displayName: Deploy MyHealth.API.Activity
-        environment: Production
-        pool:
-          vmImage: $(vmImageName)
-          
-        strategy:
-          runOnce:
-            deploy:
-                        
-              steps:
-              - task: AzureKeyVault@1
-                inputs:
-                  azureSubscription: '$(azureSubscription)'
-                  KeyVaultName: 'willvelidakeyvault'
-                  SecretsFilter: '*'
-                  RunAsPreJob: false
-          
-              - task: AzureRmWebAppDeployment@4
-                displayName: 'Deploy Azure Function'
-                inputs:
-                  azureSubscription: '$(azureSubscription)'
-                  appType: functionApp
-                  WebAppName: $(postProdFunctionAppName)                   
-                  package: '$(Pipeline.Workspace)/drop/MyHealth.API.Activity.zip'
-                  appSettings: '-FUNCTIONS_WORKER_RUNTIME "dotnet" -FUNCTIONS_EXTENSION_VERSION "~3" -CosmosDBConnectionString "$(cosmosdbconnectionstring)" -DatabaseName "MyHealthDB" -ContainerName "Records"  -APPINSIGHTS_INSTRUMENTATIONKEY "2fc597df-fc6b-4b20-ac9c-ee7240b70704" -ServiceBusConnectionString "$(servicebusstorageconnectionstring)" -ExceptionQueue "myhealthexceptionqueue"'
-                  enableCustomDeployment: true
-                  RemoveAdditionalFilesFlag: true
