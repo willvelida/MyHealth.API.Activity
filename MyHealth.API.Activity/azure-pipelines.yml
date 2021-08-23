@@ -93,13 +93,11 @@ stages:
                     SecretsFilter: '*'
                     RunAsPreJob: false
 
-                - task: AzureRmWebAppDeployment@4
+                - task: AzureFunctionApp@1
                   displayName: 'Deploy Azure Function'
                   inputs:
                     azureSubscription: '$(azureSubscription)'
-                    appType: functionApp
-                    WebAppName: $(functionAppName)                   
+                    appType: functionAppLinux
+                    appName: $(functionAppName)                   
                     package: '$(Pipeline.Workspace)/drop/MyHealth.API.Activity.zip'
                     appSettings: '-FUNCTIONS_WORKER_RUNTIME "dotnet" -FUNCTIONS_EXTENSION_VERSION "~3" -CosmosDBConnectionString "$(cosmosdbconnectionstring)" -DatabaseName "MyHealthDB" -ContainerName "Records"  -APPINSIGHTS_INSTRUMENTATIONKEY "2fc597df-fc6b-4b20-ac9c-ee7240b70704" -ServiceBusConnectionString "$(servicebusstorageconnectionstring)" -ExceptionQueue "myhealthexceptionqueue"'
-                    enableCustomDeployment: true
-                    RemoveAdditionalFilesFlag: true
