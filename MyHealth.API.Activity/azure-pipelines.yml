@@ -3,7 +3,7 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
-  vmImageName: 'vs2017-win2016'
+  vmImageName: 'ubuntu-latest'
   functionAppName: 'famyhealthapiactivity'
   azureSubscription: 'e86d34ea-25ef-4288-8ffb-5baaea87a61b'
   workingDirectory: '$(System.DefaultWorkingDirectory)/MyHealth.API.Activity'
@@ -45,7 +45,7 @@ stages:
   
           - script: |
               dotnet tool install -g dotnet-reportgenerator-globaltool
-              reportgenerator -reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:HtmlInline_AzurePipelines;Cobertura
+              reportgenerator -reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:HtmlInline_AzurePipelines
             displayName: Create Code coverage report
   
           - task: PublishCodeCoverageResults@1
